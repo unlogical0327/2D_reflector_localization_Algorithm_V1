@@ -5,13 +5,16 @@ function [Lidar_update_Table,Lidar_update_xy]=update_Lidar_scan_xy(ret_R,ret_T,L
 % ret_R: rotation matrix
 % ret_T: transition matrix
 % Lidar_Table1: new Lidar scan data
-% LIdar_Table: reference lidar data
+% Lidar_Table: reference lidar data
 A1=Lidar_Table1;
-B1=Lidar_Table;
-n_t=length(A1);
-A2 = ret_R^-1*(A1 - repmat(ret_T, 1, n_t));   % !!!! why should I use -
+B1(1,:)=Lidar_Table(1,:);
+B1(2,:)=Lidar_Table(2,:);
+n_t=length(A1)
+size(A1')
+size(repmat(ret_T, 1, n_t))
+A2 = ret_R^-1*(A1' - repmat(ret_T, 1, n_t));   % !!!! why should I use -
 %A2 = A2';
-Lidar_update_Table=A2;
+Lidar_update_Table=A2';   % convert back Lidar data with R and T
 % Find the error
 err = A2 - B1;
 err = err .* err;
@@ -21,5 +24,5 @@ rmse = sqrt(err/n_t);
 disp(sprintf("RMSE of whole map: %f", rmse));
 %disp("If RMSE is approaching zero, the matching is getting very close!");
 
-Lidar_xy=[Lidar_x;Lidar_y]';
-Lidar_update_xy=ret_R^-1*(Lidar_xy-ret_T)';
+Lidar_xy=[Lidar_x;Lidar_y]';  % initial x y location to calculate current location
+Lidar_update_xy=(ret_R^-1*(Lidar_xy'-repmat(ret_T, 1, 2)'))';
